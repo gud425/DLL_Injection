@@ -9,7 +9,7 @@
 
 ### 메인소스
 
-```sh
+```C++
 void register_program() {
 	HKEY  m_hRegsKey;
 	const WCHAR* regItemName = L"dll_injection_by_nam";
@@ -22,7 +22,7 @@ void register_program() {
 SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run 에 추가하여 컴퓨터 시작될때마다 자동으로 실행되게 만드는 함수 </br></br>
 
 
-```sh
+```C++
 DWORD32 get_pid(wstring proc_name) {
 
 	PROCESSENTRY32 pe32;
@@ -41,7 +41,7 @@ DWORD32 get_pid(wstring proc_name) {
 ```
 구할 프로세스의 이름을 인자로 주면 PID를 리턴하는 함수 </br></br>
 
-```sh
+```C++
 BOOL dll_inject(DWORD hwPID, LPCTSTR DllPath) {
 	HANDLE hProcess = NULL;
 	HANDLE hThread = NULL; 
@@ -63,4 +63,18 @@ BOOL dll_inject(DWORD hwPID, LPCTSTR DllPath) {
 	return 1; 
 }
 ```
-DLL 인젝션의 핵심 부분으로  </br></br>
+DLL 인젝션의 핵심 부분이다.    
+1. **OpenProcess**(**dwDesiredAccess**:접근권한, **bInheritHandle**:TRUE면 핸들을 상속, FALSE면 상속X, **dwProcessId**:프로세스 식별자(PID)) 리턴값으로 대상 프로세스의 핸들을 구한다.   
+2. **VirtualAllocEx**(**hProcess**:인젝션할 프로세스의 핸들, **lpAddress**:할당할 주소로 NULL을 넣으면 자동, **dwSize**:할당할 메모리의 크기(byte), **flAllocationType**:할당유형-전체메모리 내에 할당하려면 MEM_COMMIT(0x1000), **flProtect**:할당된페이지에 대한 권한)    
+리턴값으로 대상 프로세스에 LPVOID형의 메모리 공간을 확보해 DLL의 경로를 넣을 공간을 만든다.
+
+3. **WriteProcessMemory**(**hProcess**:프로세스의 핸들, **lpBaseAddress**:DLL절대경로를 작성할 주소, **lpBaseAddress**:DLL의 절대경로가 작성된주소, **nSize**:Write할 바이트 크기(DLL의 절대경로의 길이보다 크게 지정), **lpNumberOfBytesWritten**:Write가 잘 되었는지 작성한 바이트를 저장하는 주소)    
+
+4. **GetModuleHandle**(TEXT("kernel32.dll"));
+5. **GetProcAddress**(hMod, "LoadLibraryW");    
+LoadLibrary는 kernel32.dll에 존재하므로 kernel32.dll의 핸들을 얻고 LoadLibrary의 주소를 구한다.
+
+6. **CreateRemoteThread**(**hProcess**:프로세스의 핸들, **lpThreadAttributes**:보안속성-특별한 속성이 없다면 NULL, **dwStackSize**:스택의 초기사이즈(byte)-0을 넣으면 실행파일의 default size를 사용, **lpStartAddress**:스레드의 시작주소, **lpParamete**r:스레드가 실행할 함수의 파라미터, **dwCreationFlags** : 0을 넣으면 스레드 생성직후에 실행, **lpThreadId** : 스레드식별자(TID)를 저장하기위한 주소)
+
+
+</br></br>
