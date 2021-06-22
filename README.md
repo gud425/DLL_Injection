@@ -6,6 +6,34 @@
     
 
 ## 소스해석
+### DLL 소스
+```C++
+DWORD WINAPI ThreadProc(LPVOID lparm) {
+    int a=0, b=0, c=0;
+    int flag = 0,return_val;
+    while (1) {
+        if (flag)
+            break;
+        for (int i = 0; i < (a * b * c) + 1; i++) {
+            return_val=MessageBox(NULL, L"hacked by nam", L"LOL", MB_YESNOCANCEL|MB_ICONWARNING);
+            if (return_val == IDYES)
+                a++;
+            else if (return_val == IDNO)
+                b++;
+            else if (return_val == IDCANCEL)
+                c++;
+
+            if (a == 4&&b == 2&&c == 5) {
+                flag = 1;
+                break;
+            }
+        }
+
+    }
+    return 0;
+}
+```
+messagebox에서 나오는 버튼 3개를 각각 4 2 5번 누르면 꺼지게 동작
 
 ### 메인소스
 
