@@ -104,5 +104,7 @@ LoadLibrary는 kernel32.dll에 존재하므로 kernel32.dll의 핸들을 얻고 
 
 6. **CreateRemoteThread**(**hProcess**:프로세스의 핸들, **lpThreadAttributes**:보안속성-특별한 속성이 없다면 NULL, **dwStackSize**:스택의 초기사이즈(byte)-0을 넣으면 실행파일의 default size를 사용, **lpStartAddress**:스레드의 시작주소, **lpParamete**r:스레드가 실행할 함수의 파라미터, **dwCreationFlags** : 0을 넣으면 스레드 생성직후에 실행, **lpThreadId** : 스레드식별자(TID)를 저장하기위한 주소)
 
-
 </br></br>
+## 탐지방법
+CreateRemoteThread의 인자중 lpStartAddress의 인자로 GetProcAddress로 얻어온 LoadLibrary주소가 들어가게 되는데 이부분을 탐지하면 된다.
+
